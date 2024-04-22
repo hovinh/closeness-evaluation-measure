@@ -1,0 +1,4 @@
+﻿actual\predict,negative,neutral,positive
+negative,7,1,2
+neutral,12,45,3
+positive,4,8,18

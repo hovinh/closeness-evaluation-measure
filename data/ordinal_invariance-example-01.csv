@@ -1,0 +1,6 @@
+﻿actual\predict,reject,weak reject,undecided,weak accept,accept
+reject,3,0,0,0,0
+weak reject,0,3,0,0,0
+undecided,0,0,3,0,0
+weak accept,0,0,0,0,0
+accept,0,0,0,0,0

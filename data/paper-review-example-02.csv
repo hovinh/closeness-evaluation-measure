@@ -1,0 +1,6 @@
+﻿class_name,order,frequency
+reject,1,180
+weak reject,2,10
+undecided,3,3
+weak accept,4,10
+accept,5,173
