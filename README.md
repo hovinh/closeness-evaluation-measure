@@ -8,7 +8,7 @@
 
 ## Prerequisites
 - Python 3.9
-- Packages: streamlit, numpy, pandas, matplotlib
+- Packages: requirements.txt
 
 ## Local Execution:
 ```bash
