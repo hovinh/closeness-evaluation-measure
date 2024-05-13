@@ -59,7 +59,7 @@ pyparsing==3.1.2
 pyproject_hooks==1.0.0
 python-dateutil==2.9.0
 pytz==2024.1
-pywin32==306
+# pywin32==306
 pyzmq==26.0.2
 referencing==0.34.0
 requests==2.31.0
