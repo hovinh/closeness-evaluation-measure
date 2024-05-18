@@ -26,24 +26,24 @@ st.set_page_config(
 st.markdown("# An Ordinal Classification Metric: Closeness Evaluation Measure")
 st.markdown(
     """
-    [Original Blog](url) |
+    [Original Blog](https://hoxuanvinh.netlify.app/blog/2024-05-17-closeness-evaluation-metric/) |
     [Github](https://github.com/hovinh/closeness-evaluation-measure) |
-    [Cited Paper](https://aclanthology.org/2020.acl-main.363.pdf)
+    [CEM Paper](https://aclanthology.org/2020.acl-main.363.pdf)
     """
 )
 
 st.markdown("## Introduction")
 description = """
 **Ordinal classification** is a type of classification task whose predicted classes (or categories) have a specific ordering.
-This implies misclassifying a class pair should be penalized differently and proportionally, with respect to their semantic order and class distribution in the dataset.
+This implies misclassifying a class pair should be penalized differently and proportionally, with respect to their semantic order and class distribution in a dataset.
 Existing evaluation metrics are shown failed to capture certain aspects of this task, that it calls for the employment of a new metric, namely **Closeness Evaluation Measure** (**$CEM$**).
 
-To be clear,
+For example,
 - precision/recall ignores the ordering among classes.
 - mean average error/mean squared error assumes a predefined interval between classes, subject to their numeric encoding.
 - ranking measures indeed capture the relative ranking in terms of relevancy, but lack of emphasis on identifying the correct class.
 
-$CEM$ employs the idea of informational closeness: the more **UNLIKELY** there is data point between a class pair, the closer they are.
+$CEM$ employs the idea of informational closeness: the less **LIKELY** there is data point between a class pair, the closer they are.
 As a result, a model that misclassifies informational-close classes should be penalized lesser than those informational-distant.
 It has been mathematically proven this measure attains the desired properties that addresses the foregoing shortcomings, which to be discussed shortly after.
 
@@ -57,8 +57,8 @@ st.markdown(description)
 
 st.markdown("## Informational Closeness", unsafe_allow_html=True)
 description = """
-Let's say we have two journals $F$ and $S$ (mockup data below) with two very distinct paper review methods.
-Reviewers at journal $F$ are very cautious and it's rare to see they review a paper as hard *reject* or hard *accept*.
+Let's say we have two journals $F$ and $S$ (mockup data below) with two very distinct natures of reviewing research paper submissions.
+Reviewers at journal $F$ are very cautious and it's rare to see they review a paper as *reject* or *accept*.
 Journal $S$, on the other hand, tends to take a clear stance on the paper's acceptance/rejection status.
 
 Given that, *weak reject* vs. *weak accept* in the context of $S$ are informational close because they are closer assessment, while
@@ -88,7 +88,7 @@ with st.container(border=True):
 
     with col2:
         st.latex("C=\{c_1, ..., c_m\}")
-        st.latex("N=\Sigma_{i=1}^{m} n_i")
+        st.latex("\{n_1, ..., n_m\}, \\ N=\Sigma_{i=1}^{m} n_i")
         st.markdown("")
         st.latex("IC(c_i, c_j)")
         st.latex("-log(.)")
@@ -197,26 +197,27 @@ with col2:
                     )
 
 description = """
-In the displayed charts for each journal, we computed $IC$ for all class combinations and show the top closest and furthest pairs.
+In the above charts, for each journal, we computed $IC$ for all class combinations and show the top closest and furthest pairs.
 As expected, both journals agree that *reject* vs. *accept* is the furthest pair.
 Journal $S$ treats those on the border: *weakly reject*, *undecided*, *weakly accept* as closest pairs, given there are small amount of data points between them.
 
 Note that, $IC$ is not symmetrical, hence $IC(c_i, c_j) \\neq IC(c_j, c_i)$. 
-Also for visibility's sake, we scale the computed value by a constant of $1/log(2)$. 
+Also for the ease of readability, we scale the computed value by a constant of $1/log(2)$. 
 """
 st.markdown(description)
 
 st.markdown("## Closeness Evaluation Measure", unsafe_allow_html=True)
 description = """
-Next question: How to convey the idea of informational closeness to a usable evaluation metric for ordinal classification task?
+Next question: How to formulate the idea of informational closeness to an usable evaluation metric for ordinal classification task?
 
-It's simple. Firstly, you compute the $IC$ for classes in a particular dataset; 
-this quantity translates to the reward for making an ordinal step from one class to another which are distributionally close.
+It's simple. Assume you have an ordinal classification dataset whose each data point labelled an ordinal class.
+Firstly, you compute the $IC$ for classes in the dataset; 
+this quantity translates to the reward for making an ordinal step from one class to another which are distributionally closer.
 Secondly, assume you have a candidate Machine Learning model has been trained on such dataset and ready to evaluate. 
 For each data point, we favour prediction whose class is close to the groundtruth; 
-an accurate class matching results to a point $1$, while the lesser earning lower point.
+an accurate class matching results to a point $1$, while the lesser earning a lesser point.
 Doing the same for all predictions, we obtain the overall performance measure, i.e. $CEM$.
-The highest achievable score for $CEM$ is $1$, that is the higher the better.
+The highest achievable score for $CEM$ is $1$, that is, the higher the better.
 
 More formally,
 """
@@ -249,7 +250,7 @@ with st.container(border=True):
         st.latex("\\frac{ IC[m(d), g(d)]} {IC[g(d), g(d)]}")
         st.latex("\Sigma_{d \in D}")
 
-st.markdown("Put it all together, we have")
+st.markdown("Put together, we have")
 st.latex(
     "CEM(m, g) = \\frac{\Sigma_{d \in D} IC[m(d), g(d)]} {\Sigma_{d \in D} IC[g(d), g(d)]}"
 )
@@ -257,7 +258,10 @@ st.latex(
 st.markdown("## Metric Properties", unsafe_allow_html=True)
 description = """
 $CEM$ has been proven to satisfy three mathematical properties that address the shortcomings of other metrics.
-Each property to be accompanied by a pair of datasets, whose groundtruth and prediction are depicted in the x-axis and coloring, respectively. 
+That is, the metrics take into account of ordering information, does not assume a predefined interval between classes, 
+and reward the highest score for identifying the correct class.
+
+Below are subsections elaborating the properties. Each property to be accompanied by a pair of exampled datasets, whose groundtruth and prediction are depicted in the x-axis and coloring, respectively. 
 This to illustrate the intuition behind each property, and in order to read the charts properly, 
 do pay attention to Ordinal Invariance section.
 """
@@ -265,18 +269,20 @@ st.markdown(description)
 st.markdown("### Ordinal Invariance")
 
 description = """
-**First Dataset** is a journal paper review dataset with 9 data points. 
+**First Dataset** is a journal paper review dataset with $9$ data points. 
 The x-axis' ticks depict their true classes: $3$ *rejects*, $3$ *weak rejects*, $3$ *undecideds* and $0$ for the other two classes. 
 The coloring of the circles ( 
 <strong><span style='color: pink;'>pink</span></strong>, 
 <strong><span style='color: red;'>red</span></strong>, 
 <strong><span style='color: #FFD700;'>yellow</span></strong>, 
 <strong><span style='color: #00FF00;'>dark green</span></strong>, 
-<strong><span style='color: #98FB98;'>light green</span></strong>), i.e. model prediction, depicts the data points' predictions are exact matches to their true classes.
+<strong><span style='color: #98FB98;'>light green</span></strong>), depicts the data points' predictions. 
+In this data set, the $9$ predictions are exact matches to their true classes.
 
 **Second Dataset** is similar with $100\%$ match for other set of classes: $3$ *rejects*, $3$ *undecideds*, $3$ *weak accepts*.
+Its mere difference is that its groundtruth shifted their value to strictly higher-order classes.
 
-Both datasets result in the same metric value because both the model output and groundtruth shift their value in a strictly increasing manner.
+Therefore, Ordinal Invariance states that the metric value should remain the same if a dataset have its model output and groundtruth shift their value in a strictly higher-order classes.
 """
 st.markdown(description, unsafe_allow_html=True)
 
@@ -317,7 +323,7 @@ with col2:
 
 st.markdown("### Monotonicity")
 description = """
-Changing the model output closer to the groundtruth should result in a metric increase.
+Monotonicity states that, changing the model output closer to the groundtruth should result in a metric increase.
 
 Indeed, **First Dataset** have one *weak accept* point misclassified as *undecided*.
 **Second Dataset** should perform worse because the very same data point is misclassified to a further class, i.e. *weak reject*.
@@ -365,9 +371,9 @@ with col2:
 
 st.markdown("### Imbalance")
 description = """
-A classification error in a small class should have lesser impact - or receive higher reward - in comparison to the same mistake in a frequent class.
+Imbalance states that, a classification error in a small class should have lesser impact - or receive higher reward - in comparison to the same mistake in a frequent class.
 
-**First Dataset** that misclassifies a data point from a frequent class *weak reject* should have lower metric value than 
+**First Dataset** misclassifies a data point from a frequent class, *weak reject*, should have lower metric value than 
 **Second Dataset** that misclassifies a data point from a small class, i.e. *weak accept*.
 """
 st.markdown(description, unsafe_allow_html=True)
@@ -417,14 +423,14 @@ with col2:
 # Section 3
 st.markdown("## An Example Usecase", unsafe_allow_html=True)
 description = """
-Let's put $CEM$ into an actual test!
+Let's put $CEM$ into a test!
 
-Given a same dataset, we have the confusion matrix for two model $A$ and $B$ as followings.
+Given a dataset, we have the confusion matrix for two model $A$ and $B$ as followings.
 From **accuracy** metric standpoint, both models are on par.
 $CEM$ said otherwise and highlights that model $B$ should be the better performer.
 
 It is indeed a true evaluation, in view that:
-- Model $A$ makes more mistakes between distant classes *positive*-*negative* ($7+4 > 4+2$).
+- Model $A$ makes more mistakes between distant classes: *positive*-*negative* ($7+4 > 4+2$).
 - Model $A$ makes more mistakes in *positive*-*neutral*, whose population represent $90\%$ of the dataset, hence penalized more heavily, or precisely, earning less reward.
 """
 st.markdown(description)
